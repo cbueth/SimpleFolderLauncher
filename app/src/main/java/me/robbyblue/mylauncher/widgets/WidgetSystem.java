@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.LinearLayout;
 
 import java.util.HashMap;
@@ -37,33 +38,39 @@ public class WidgetSystem {
         Context ctx = container.getContext();
         LinearLayout childLayout = new LinearLayout(ctx);
 
-        int screenWidth = container.getWidth();
+        // Get available space - use container's parent dimensions if needed
+        View parent = container.getParent() instanceof View ? (View) container.getParent() : container;
+        int screenWidth = parent.getWidth();
+        int screenHeight = parent.getHeight();
+        
+        // Fallback if not measured yet
+        if (screenWidth <= 0) screenWidth = 720;
+        if (screenHeight <= 0) screenHeight = 1280;
 
         if (showOutlines) {
             childLayout.setBackground(createOutline(Color.MAGENTA));
         }
 
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(ctx);
-        AppWidgetProviderInfo appWidgetInfo = appWidgetManager.getAppWidgetInfo(((WidgetElement) widget).getAppWidgetId());
+        // Use the stored size percentage (30 = 30%)
+        double sizePercent = widget.getSize() / 100.0;
+        // Clamp to reasonable range (5% to 100%)
+        if (sizePercent < 0.05) sizePercent = 0.05;
+        if (sizePercent > 1.0) sizePercent = 1.0;
+        
+        int height = (int) (screenHeight * sizePercent);
+        if (height < 50) height = 50;
 
-        if (appWidgetInfo == null) {
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(screenWidth, 100);
-            childLayout.setLayoutParams(layoutParams);
-            container.addView(childLayout);
-            return childLayout;
-        }
-
-        int minWidth = appWidgetInfo.minWidth;
-        int minHeight = appWidgetInfo.minHeight;
-
-        if (minWidth == 0) {
-            minWidth = minHeight = 1;
-        }
-
-        int height = (int) (screenWidth * minHeight / minWidth);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(screenWidth, height);
         childLayout.setLayoutParams(layoutParams);
         childLayout.setGravity(Gravity.CENTER);
+
+        // Add the actual widget view if available
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(ctx);
+        AppWidgetProviderInfo appWidgetInfo = appWidgetManager.getAppWidgetInfo(widget.getAppWidgetId());
+        
+        if (appWidgetInfo != null) {
+            // The widget view is handled by the host in the parent
+        }
 
         container.addView(childLayout);
         return childLayout;
@@ -74,7 +81,16 @@ public class WidgetSystem {
         LinearLayout childLayout = new LinearLayout(ctx);
 
         int screenWidth = container.getWidth();
-        int height = (int) (screenWidth * widget.getSize());
+        if (screenWidth <= 0) screenWidth = 720;
+        
+        // getSize() stored as integer (30 = 30%), convert
+        double sizeFraction = widget.getSize() / 100.0;
+        if (sizeFraction < 0.05) sizeFraction = 0.05;
+        if (sizeFraction > 1.0) sizeFraction = 1.0;
+        
+        int height = (int) (screenWidth * sizeFraction);
+        if (height < 50) height = 50;
+        
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(screenWidth, height);
         childLayout.setLayoutParams(layoutParams);
 
@@ -93,7 +109,13 @@ public class WidgetSystem {
         Context ctx = container.getContext();
         LinearLayout childLayout = new LinearLayout(ctx);
 
-        int width = (int) (parentWidth * widget.getSize());
+        // getSize() is stored as integer (30 = 30%), convert to decimal
+        double sizeFraction = widget.getSize() / 100.0;
+        if (sizeFraction < 0.01) sizeFraction = 0.01;
+        if (sizeFraction > 1.0) sizeFraction = 1.0;
+        
+        int width = (int) (parentWidth * sizeFraction);
+        if (width < 20) width = 20;
 
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, parentHeight);
         childLayout.setLayoutParams(layoutParams);

@@ -51,7 +51,8 @@ public class WidgetSetupActivity extends AppCompatActivity {
     ActivityResultLauncher<Intent> pickWidgetLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         if (result.getResultCode() != RESULT_OK) return;
 
-        int appWidgetId = result.getData().getExtras().getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
+        int appWidgetId = result.getData().getExtras().getInt(WidgetPickerActivity.EXTRA_APPWIDGET_ID, -1);
+        if (appWidgetId == -1) return;
 
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         android.appwidget.AppWidgetProviderInfo widgetInfo = appWidgetManager.getAppWidgetInfo(appWidgetId);
@@ -158,13 +159,27 @@ public class WidgetSetupActivity extends AppCompatActivity {
         }
     }
 
+    ActivityResultLauncher<Intent> widgetPickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() != RESULT_OK) return;
+
+        int appWidgetId = result.getData().getExtras().getInt(WidgetPickerActivity.EXTRA_APPWIDGET_ID, -1);
+        if (appWidgetId == -1) return;
+
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
+        android.appwidget.AppWidgetProviderInfo widgetInfo = appWidgetManager.getAppWidgetInfo(appWidgetId);
+
+        pendingWidgetId = appWidgetId;
+        pendingNeedsConfig = (widgetInfo != null && widgetInfo.configure != null);
+
+        pendingElement = new WidgetElement(appWidgetId, 100);
+
+        showSizeDialog(true, pendingWidgetId, pendingNeedsConfig);
+    });
+
     private void pickWidget(boolean isInRow) {
-        AppWidgetHost appWidgetHost = new AppWidgetHost(this, MainActivity.APPWIDGET_HOST_ID);
-        int appWidgetId = appWidgetHost.allocateAppWidgetId();
-        Intent pickIntent = new Intent(AppWidgetManager.ACTION_APPWIDGET_PICK);
-        pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-        pickWidgetLauncher.launch(pickIntent);
         this.isInRow = isInRow;
+        Intent pickIntent = new Intent(this, WidgetPickerActivity.class);
+        widgetPickerLauncher.launch(pickIntent);
     }
 
     private void showSizeDialog(boolean isWidget, int widgetId, boolean needsConfig) {
@@ -194,7 +209,9 @@ public class WidgetSetupActivity extends AppCompatActivity {
                 double size = number / 100d;
 
                 if (creatingRow) {
-                    WidgetList list = new WidgetList(size);
+                    // size is decimal (0.30), convert to integer (30) for storage
+                    int sizeInt = (int) (size * 100);
+                    WidgetList list = new WidgetList(sizeInt);
                     WidgetList widgetList = fs.getFolderContents(folder).getWidgetList();
                     widgetList.addChild(list);
                     fs.storeFilesStructure();
@@ -220,7 +237,8 @@ public class WidgetSetupActivity extends AppCompatActivity {
     }
 
     private void addWidgetDirectly(int appWidgetId, double size, boolean inRow) {
-        WidgetElement element = new WidgetElement(appWidgetId, (int) (size * 100));
+        int sizeInt = (int) (size * 100);
+        WidgetElement element = new WidgetElement(appWidgetId, sizeInt);
 
         FileDataStorage fs = FileDataStorage.getInstanceAssumeExists();
         WidgetList widgetList = fs.getFolderContents(folder).getWidgetList();

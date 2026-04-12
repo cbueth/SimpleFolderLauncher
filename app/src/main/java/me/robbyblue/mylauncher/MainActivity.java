@@ -370,7 +370,7 @@ public class MainActivity extends AppCompatActivity {
         HashMap<WidgetLayout, LinearLayout> layouts = WidgetSystem.createLayout(widgets, widgetContainer, false);
 
         for (WidgetLayout widgetLayout : layouts.keySet()) {
-            if (!(widgetLayout instanceof WidgetElement)) return;
+            if (!(widgetLayout instanceof WidgetElement)) continue;
 
             LinearLayout layout = layouts.get(widgetLayout);
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(ctx);
