@@ -60,10 +60,9 @@ public class WidgetSystem {
             minWidth = minHeight = 1;
         }
 
-        // For top-level widgets, use stored size with division
         double heightValue = minHeight / (double) minWidth;
         if (widget.getSize() > 0) {
-            heightValue = widget.getSize() / 100.0;
+            heightValue = widget.getSize();
         }
         int height = (int) (screenWidth * heightValue);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(screenWidth, height);
@@ -98,10 +97,7 @@ public class WidgetSystem {
         Context ctx = container.getContext();
         LinearLayout childLayout = new LinearLayout(ctx);
 
-        // For widgets in row: size stored as integer (30), need to divide by 100
-        // For rows: size stored as decimal (0.30), use as-is
-        double sizeValue = widget instanceof WidgetElement ? widget.getSize() / 100.0 : widget.getSize();
-        int width = (int) (parentWidth * sizeValue);
+        int width = (int) (parentWidth * widget.getSize());
         if (width < 20) width = 20;
 
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, parentHeight);

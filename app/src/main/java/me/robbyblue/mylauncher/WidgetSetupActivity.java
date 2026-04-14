@@ -194,15 +194,15 @@ public class WidgetSetupActivity extends AppCompatActivity {
                 double size = number / 100d;
 
                 if (creatingRow) {
-                    WidgetList list = new WidgetList(size);
+                    WidgetList list = new WidgetList(number / 100d);
                     WidgetList widgetList = fs.getFolderContents(folder).getWidgetList();
                     widgetList.addChild(list);
                     fs.storeFilesStructure();
                     showLayout();
                 } else if (needsConfig) {
-                    launchConfigForWidget(widgetId, size, isWidget);
+                    launchConfigForWidget(widgetId, number, isWidget);
                 } else {
-                    addWidgetDirectly(widgetId, size, isWidget);
+                    addWidgetDirectly(widgetId, number, isWidget);
                 }
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "invalid number", Toast.LENGTH_LONG).show();
@@ -220,7 +220,7 @@ public class WidgetSetupActivity extends AppCompatActivity {
     }
 
     private void addWidgetDirectly(int appWidgetId, double size, boolean inRow) {
-        WidgetElement element = new WidgetElement(appWidgetId, (int) (size * 100));
+        WidgetElement element = new WidgetElement(appWidgetId, size / 100d);
 
         FileDataStorage fs = FileDataStorage.getInstanceAssumeExists();
         WidgetList widgetList = fs.getFolderContents(folder).getWidgetList();
@@ -241,7 +241,7 @@ public class WidgetSetupActivity extends AppCompatActivity {
         android.appwidget.AppWidgetProviderInfo widgetInfo = appWidgetManager.getAppWidgetInfo(appWidgetId);
 
         if (widgetInfo != null && widgetInfo.configure != null) {
-            pendingElement = new WidgetElement(appWidgetId, (int) (size * 100));
+            pendingElement = new WidgetElement(appWidgetId, size / 100d);
             this.isInRow = inRow;
 
             ComponentName configureComponent = widgetInfo.configure;
