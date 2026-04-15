@@ -438,13 +438,31 @@ public class WidgetSetupActivity extends AppCompatActivity {
         builder.setView(input);
         builder.setCustomTitle(titleLayout);
 
-        builder.setPositiveButton("OK", (dialog, which) -> {
-            FileDataStorage fs = FileDataStorage.getInstanceAssumeExists();
+        builder.setPositiveButton("OK", null);
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            if (needsConfig && widgetId != -1) {
+                AppWidgetHost host = new AppWidgetHost(this, MainActivity.APPWIDGET_HOST_ID);
+                host.deleteAppWidgetId(widgetId);
+                pendingElement = null;
+            }
+        });
+
+        AlertDialog dialog = builder.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            FileDataStorage fs;
+            try {
+                fs = FileDataStorage.getInstanceAssumeExists();
+            } catch (Exception e) {
+                return;
+            }
 
             String numberText = input.getText().toString();
             try {
                 double number = Double.parseDouble(numberText);
                 if (number < 1 || number > maxNumber) {
+                    Toast.makeText(this, "Please enter a number between 1 and " + maxNumber, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 double size = number / 100d;
@@ -460,19 +478,11 @@ public class WidgetSetupActivity extends AppCompatActivity {
                 } else {
                     addWidgetDirectly(widgetId, size, isWidget);
                 }
+                dialog.dismiss();
             } catch (NumberFormatException e) {
-                Toast.makeText(this, "invalid number", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Invalid number", Toast.LENGTH_LONG).show();
             }
         });
-
-        builder.setNegativeButton("Cancel", (dialog, which) -> {
-            if (needsConfig && widgetId != -1) {
-                AppWidgetHost host = new AppWidgetHost(this, MainActivity.APPWIDGET_HOST_ID);
-                host.deleteAppWidgetId(widgetId);
-                pendingElement = null;
-            }
-        });
-        builder.show();
     }
 
     private void addWidgetDirectly(int appWidgetId, double size, boolean inRow) {
