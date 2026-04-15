@@ -450,15 +450,15 @@ public class WidgetSetupActivity extends AppCompatActivity {
                 double size = number / 100d;
 
                 if (creatingRow) {
-                    WidgetList list = new WidgetList(number);
+                    WidgetList list = new WidgetList(size);
                     WidgetList widgetList = fs.getFolderContents(folder).getWidgetList();
                     widgetList.addChild(list);
                     fs.storeFilesStructure();
                     showLayout();
                 } else if (needsConfig) {
-                    launchConfigForWidget(widgetId, (int) number, isWidget);
+                    launchConfigForWidget(widgetId, size, isWidget);
                 } else {
-                    addWidgetDirectly(widgetId, (int) number, isWidget);
+                    addWidgetDirectly(widgetId, size, isWidget);
                 }
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "invalid number", Toast.LENGTH_LONG).show();
@@ -475,8 +475,8 @@ public class WidgetSetupActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void addWidgetDirectly(int appWidgetId, int sizePercent, boolean inRow) {
-        WidgetElement element = new WidgetElement(appWidgetId, sizePercent);
+    private void addWidgetDirectly(int appWidgetId, double size, boolean inRow) {
+        WidgetElement element = new WidgetElement(appWidgetId, size);
 
         FileDataStorage fs = FileDataStorage.getInstanceAssumeExists();
         WidgetList widgetList = fs.getFolderContents(folder).getWidgetList();
@@ -492,12 +492,12 @@ public class WidgetSetupActivity extends AppCompatActivity {
         showLayout();
     }
 
-    private void launchConfigForWidget(int appWidgetId, int sizePercent, boolean inRow) {
+    private void launchConfigForWidget(int appWidgetId, double size, boolean inRow) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         android.appwidget.AppWidgetProviderInfo widgetInfo = appWidgetManager.getAppWidgetInfo(appWidgetId);
 
         if (widgetInfo != null && widgetInfo.configure != null) {
-            pendingElement = new WidgetElement(appWidgetId, sizePercent);
+            pendingElement = new WidgetElement(appWidgetId, size);
             this.isInRow = inRow;
 
             ComponentName configureComponent = widgetInfo.configure;

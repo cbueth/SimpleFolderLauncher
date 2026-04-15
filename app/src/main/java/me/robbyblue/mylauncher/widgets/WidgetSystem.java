@@ -53,9 +53,7 @@ public class WidgetSystem {
         int screenWidth = metrics.widthPixels;
 
         double sizeValue = widget.getSize();
-        double sizePercent = sizeValue / 100.0;
-        if (sizePercent < 0.05) sizePercent = 0.05;
-        if (sizePercent > 1.0) sizePercent = 1.0;
+        double sizePercent = Math.max(0.05, (Math.min(sizeValue, 1.0)));
 
         int height = (int) (screenWidth * sizePercent);
         if (height < 50) height = 50;
@@ -104,9 +102,7 @@ public class WidgetSystem {
         int screenWidth = metrics.widthPixels;
 
         double sizeValue = widget.getSize();
-        double sizePercent = sizeValue / 100.0;
-        if (sizePercent < 0.05) sizePercent = 0.05;
-        if (sizePercent > 1.0) sizePercent = 1.0;
+        double sizePercent = Math.max(0.05, (Math.min(sizeValue, 1.0)));
 
         int height = (int) (screenWidth * sizePercent);
         if (height < 50) height = 50;
@@ -151,9 +147,7 @@ public class WidgetSystem {
         FrameLayout wrapper = new FrameLayout(ctx);
 
         double sizeValue = widget.getSize();
-        double sizePercent = sizeValue / 100.0;
-        if (sizePercent < 0.01) sizePercent = 0.01;
-        if (sizePercent > 1.0) sizePercent = 1.0;
+        double sizePercent = Math.max(0.05, (Math.min(sizeValue, 1.0)));
 
         int width = (int) (parentWidth * sizePercent);
         if (width < 20) width = 20;
